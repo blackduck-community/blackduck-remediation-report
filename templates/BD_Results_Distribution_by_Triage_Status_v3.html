@@ -1,0 +1,736 @@
+<HTML>
+  <head>  
+    <style>
+      table, th, td {  
+        border: 1px solid black;  
+        border-collapse: collapse;  
+      }  
+      th, td {  
+        padding: 5px;
+      }
+      table#alter tr:nth-child(even) {  
+        background-color: #eee; 
+      }  
+      table#alter tr:nth-child(odd) {  
+        background-color: #fff;  
+      }  
+      table#alter th {  
+        color: white;  
+        background-color: gray;  
+      }  
+      table#alter th a:any-link {
+        color: white;
+      }
+    </style>
+  </head>  
+<title>BD Report</Title>
+<body>
+<h1>Black Duck Status Report</h1>
+<b>Report run time:</b> {{ reportTime }}<BR>
+<b>Black Duck URL:</b> {{ bdURL }}<BR>
+<h3>Total project count: {{totals['ProjectTotalCount']}} and total version count: {{totals['ProjectTotalVersionCount']}}</h3>
+<i>Note: Project versions with following phases: "{{phases}}" are calculated together.</i><br>
+<i>Note: Project versions with following distibutions: "{{distibutions}}" are calculated together.</i>
+{% if projectGroup is not none %}
+<br><i>Note: Results are from project versions from project group <b>{{projectGroup}}</b> and groups below.</i>
+{% endif %}
+{% if silentDays is not none %}
+<br><i>Note: In front of the project version name is an icon <span style='color:red'>&#9888;&nbsp;</span> if the version last scanned date is older than {{sinceDays}} days.
+{% endif %}
+
+<h2>Results Distribution by Triage Status</h2>
+<table id="alter">
+<tr>
+  <th>Triage Status</th>
+  <th>Critical</th>
+  <th>High</th>
+  <th>Medium</th>
+  <th>Low</th>
+  <th>Total</th>
+</tr>
+<tr>
+  <td><b><a href="#new">New</a></b></td>
+  <td>{{ totals['NEW']['CRITICAL'] }}</td>
+  <td>{{ totals['NEW']['HIGH'] }}</td>
+  <td>{{ totals['NEW']['MEDIUM'] }}</td>
+  <td>{{ totals['NEW']['LOW'] }}</td>
+  <td>{{ totals['NEW']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#ignored">Ignored</a></b></td>
+  <td>{{ totals['IGNORED']['CRITICAL'] }}</td>
+  <td>{{ totals['IGNORED']['HIGH'] }}</td>
+  <td>{{ totals['IGNORED']['MEDIUM'] }}</td>
+  <td>{{ totals['IGNORED']['LOW'] }}</td>
+  <td>{{ totals['IGNORED']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#dublicate">Dublicate</a></b></td>
+  <td>{{ totals['DUPLICATE']['CRITICAL'] }}</td>
+  <td>{{ totals['DUPLICATE']['HIGH'] }}</td>
+  <td>{{ totals['DUPLICATE']['MEDIUM'] }}</td>
+  <td>{{ totals['DUPLICATE']['LOW'] }}</td>
+  <td>{{ totals['DUPLICATE']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#mitigated">Mitigated</a></b></td>
+  <td>{{ totals['MITIGATED']['CRITICAL'] }}</td>
+  <td>{{ totals['MITIGATED']['HIGH'] }}</td>
+  <td>{{ totals['MITIGATED']['MEDIUM'] }}</td>
+  <td>{{ totals['MITIGATED']['LOW'] }}</td>
+  <td>{{ totals['MITIGATED']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#needs_review">Needs Review</a></b></td>
+  <td>{{ totals['NEEDS_REVIEW']['CRITICAL'] }}</td>
+  <td>{{ totals['NEEDS_REVIEW']['HIGH'] }}</td>
+  <td>{{ totals['NEEDS_REVIEW']['MEDIUM'] }}</td>
+  <td>{{ totals['NEEDS_REVIEW']['LOW'] }}</td>
+  <td>{{ totals['NEEDS_REVIEW']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#patched">Patched</a></b></td>
+  <td>{{ totals['PATCHED']['CRITICAL'] }}</td>
+  <td>{{ totals['PATCHED']['HIGH'] }}</td>
+  <td>{{ totals['PATCHED']['MEDIUM'] }}</td>
+  <td>{{ totals['PATCHED']['LOW'] }}</td>
+  <td>{{ totals['PATCHED']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#remediation_complete">Remediation Complete</a></b></td>
+  <td>{{ totals['REMEDIATION_COMPLETE']['CRITICAL'] }}</td>
+  <td>{{ totals['REMEDIATION_COMPLETE']['HIGH'] }}</td>
+  <td>{{ totals['REMEDIATION_COMPLETE']['MEDIUM'] }}</td>
+  <td>{{ totals['REMEDIATION_COMPLETE']['LOW'] }}</td>
+  <td>{{ totals['REMEDIATION_COMPLETE']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#remediation_required">Remediation Required</a></b></td>
+  <td>{{ totals['REMEDIATION_REQUIRED']['CRITICAL'] }}</td>
+  <td>{{ totals['REMEDIATION_REQUIRED']['HIGH'] }}</td>
+  <td>{{ totals['REMEDIATION_REQUIRED']['MEDIUM'] }}</td>
+  <td>{{ totals['REMEDIATION_REQUIRED']['LOW'] }}</td>
+  <td>{{ totals['REMEDIATION_REQUIRED']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#not_affected">Not Affected</a></b></td>
+  <td>{{ totals['NOT_AFFECTED']['CRITICAL'] }}</td>
+  <td>{{ totals['NOT_AFFECTED']['HIGH'] }}</td>
+  <td>{{ totals['NOT_AFFECTED']['MEDIUM'] }}</td>
+  <td>{{ totals['NOT_AFFECTED']['LOW'] }}</td>
+  <td>{{ totals['NOT_AFFECTED']['Total'] }}</td>
+</tr>
+<tr>
+  <td><b><a href="#totals">Total Issues</a></b></td>
+  <td><b>{{ totals['NEW']['CRITICAL']+totals['IGNORED']['CRITICAL']+totals['DUPLICATE']['CRITICAL']+totals['MITIGATED']['CRITICAL']+totals['NEEDS_REVIEW']['CRITICAL']+totals['PATCHED']['CRITICAL']+totals['REMEDIATION_COMPLETE']['CRITICAL']+totals['REMEDIATION_REQUIRED']['CRITICAL']+totals['NOT_AFFECTED']['CRITICAL']}}</b></td>
+  <td><b>{{ totals['NEW']['HIGH']+totals['IGNORED']['HIGH']+totals['DUPLICATE']['HIGH']+totals['MITIGATED']['HIGH']+totals['NEEDS_REVIEW']['HIGH']+totals['PATCHED']['HIGH']+totals['REMEDIATION_COMPLETE']['HIGH']+totals['REMEDIATION_REQUIRED']['HIGH']+totals['NOT_AFFECTED']['HIGH']}}</b></td>
+  <td><b>{{ totals['NEW']['MEDIUM']+totals['IGNORED']['MEDIUM']+totals['DUPLICATE']['MEDIUM']+totals['MITIGATED']['MEDIUM']+totals['NEEDS_REVIEW']['MEDIUM']+totals['PATCHED']['MEDIUM']+totals['REMEDIATION_COMPLETE']['MEDIUM']+totals['REMEDIATION_REQUIRED']['MEDIUM']+totals['NOT_AFFECTED']['MEDIUM']}}</b></td>
+  <td><b>{{ totals['NEW']['LOW']+totals['IGNORED']['LOW']+totals['DUPLICATE']['LOW']+totals['MITIGATED']['LOW']+totals['NEEDS_REVIEW']['LOW']+totals['PATCHED']['LOW']+totals['REMEDIATION_COMPLETE']['LOW']+totals['REMEDIATION_REQUIRED']['LOW']+totals['NOT_AFFECTED']['LOW']}}</b></td>
+  <td><b>{{ totals['Total'] }}</b></td>
+</tr>
+</table>
+
+<h1>Total Snippet results by remediation status</h1>
+{% if totals['SNIPPET']['Total'] == 0 %}
+  No snippet found!.
+{% else %}
+<table id="alter">
+<tr>
+  <th>&nbsp;</th>
+  <th>Unreviewed</th>
+  <th>Reviewed</th>
+  <th>Ignored</th>
+  <th>Total</th>
+</tr>
+<tr>
+  <td><b><a href="#snippets">Snippets</a></b></td>
+  <td>{{ totals['SNIPPET']['unreviewed'] }}</td>
+  <td>{{ totals['SNIPPET']['reviewed'] }}</td>
+  <td>{{ totals['SNIPPET']['ignored'] }}</td>
+  <td>{{ totals['SNIPPET']['Total'] }}</td>
+</tr>
+{% endif %}
+</table>
+<br>
+<h1><a name="snippets">Snippets by Project/versions</a></h1>
+{% if totals['SNIPPET']['Total'] == 0 %}
+  No snippets found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+{% if key['SNIPPET']['Total'] > 0 %}
+<tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Unreviewed</th>
+              <th>Reviewed</th>
+              <th>Ignored</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/api/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/components?filter=bomInclusion=false&filter=bomMatchInclusion=false&filter=bomMatchReviewStatus=reviewed&limit=100&offset=100>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/components?filter=bomInclusion=false&filter=bomMatchInclusion=false&filter=bomMatchReviewStatus=reviewed&limit=100&offset=100>{{key2['versionName']}}</a></b>
+                {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['snippets']['unreviewed']}}</td>
+              <td>{{key2['snippets']['reviewed']}}</td>
+              <td>{{key2['snippets']['ignored']}}</td>
+              <td><b>{{key2['snippets']['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key['SNIPPET']['unreviewed']}}</td>
+              <td>{{key['SNIPPET']['reviewed']}}</td>
+              <td>{{key['SNIPPET']['ignored']}}</td>
+              <td><b>{{key['SNIPPET']['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+  {% endif %}
+  {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="totals">Total Issues by Project</a></h1>
+<i>Note: In front of the project name is an icon <span style='color:red'>&#9888;&nbsp;</span> if the any of its version last scanned date is older than {{sinceDays}} days.
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Critical</th>
+      <th>High</th>
+      <th>Medium</th>
+      <th>Low</th>
+      <th>Total</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        {% if key['isDormant'] == True %}
+        <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        {% else %}
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        {% endif %}
+        <td>{{key["NEW"]['CRITICAL']+key["IGNORED"]['CRITICAL']+key["DUPLICATE"]['CRITICAL']+key["MITIGATED"]['CRITICAL']+key["NEEDS_REVIEW"]['CRITICAL']+key["PATCHED"]['CRITICAL']+key["REMEDIATION_COMPLETE"]['CRITICAL']+key["REMEDIATION_REQUIRED"]['CRITICAL']+key["NOT_AFFECTED"]['CRITICAL']}}</td>
+        <td>{{key["NEW"]['HIGH']+key["IGNORED"]['HIGH']+key["DUPLICATE"]['HIGH']+key["MITIGATED"]['HIGH']+key["NEEDS_REVIEW"]['HIGH']+key["PATCHED"]['HIGH']+key["REMEDIATION_COMPLETE"]['HIGH']+key["REMEDIATION_REQUIRED"]['HIGH']+key["NOT_AFFECTED"]['HIGH']}}</td>
+        <td>{{key["NEW"]['MEDIUM']+key["IGNORED"]['MEDIUM']+key["DUPLICATE"]['MEDIUM']+key["MITIGATED"]['MEDIUM']+key["NEEDS_REVIEW"]['MEDIUM']+key["PATCHED"]['MEDIUM']+key["REMEDIATION_COMPLETE"]['MEDIUM']+key["REMEDIATION_REQUIRED"]['MEDIUM']+key["NOT_AFFECTED"]['MEDIUM']}}</td>
+        <td>{{key["NEW"]['LOW']+key["IGNORED"]['LOW']+key["DUPLICATE"]['LOW']+key["MITIGATED"]['LOW']+key["NEEDS_REVIEW"]['LOW']+key["PATCHED"]['LOW']+key["REMEDIATION_COMPLETE"]['LOW']+key["REMEDIATION_REQUIRED"]['LOW']+key["NOT_AFFECTED"]['LOW']}}</td>
+        <td><b>{{key["NEW"]['Total']+key["IGNORED"]['Total']+key["DUPLICATE"]['Total']+key["MITIGATED"]['Total']+key["NEEDS_REVIEW"]['Total']+key["PATCHED"]['Total']+key["REMEDIATION_COMPLETE"]['Total']+key["REMEDIATION_REQUIRED"]['Total']+key["NOT_AFFECTED"]['Total']}}</b></td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+
+<h1><a name="new">New Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEW"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEW"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEW"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEW"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["NEW"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["NEW"]['CRITICAL']}}</td>
+              <td>{{key["NEW"]['HIGH']}}</td>
+              <td>{{key["NEW"]['MEDIUM']}}</td>
+              <td>{{key["NEW"]['LOW']}}</td>
+              <td><b>{{key["NEW"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="ignored">Ignored Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["IGNORED"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["IGNORED"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["IGNORED"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["IGNORED"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["IGNORED"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["IGNORED"]['CRITICAL']}}</td>
+              <td>{{key["IGNORED"]['HIGH']}}</td>
+              <td>{{key["IGNORED"]['MEDIUM']}}</td>
+              <td>{{key["IGNORED"]['LOW']}}</td>
+              <td><b>{{key["IGNORED"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="dublicate">Dublicate Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["DUPLICATE"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["DUPLICATE"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["DUPLICATE"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["DUPLICATE"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["DUPLICATE"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["DUPLICATE"]['CRITICAL']}}</td>
+              <td>{{key["DUPLICATE"]['HIGH']}}</td>
+              <td>{{key["DUPLICATE"]['MEDIUM']}}</td>
+              <td>{{key["DUPLICATE"]['LOW']}}</td>
+              <td><b>{{key["DUPLICATE"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="mitigated">Mitigated Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["MITIGATED"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["MITIGATED"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["MITIGATED"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["MITIGATED"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["MITIGATED"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["MITIGATED"]['CRITICAL']}}</td>
+              <td>{{key["MITIGATED"]['HIGH']}}</td>
+              <td>{{key["MITIGATED"]['MEDIUM']}}</td>
+              <td>{{key["MITIGATED"]['LOW']}}</td>
+              <td><b>{{key["MITIGATED"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="needs_review">Needs Review Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEEDS_REVIEW"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEEDS_REVIEW"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEEDS_REVIEW"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NEEDS_REVIEW"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["NEEDS_REVIEW"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["NEEDS_REVIEW"]['CRITICAL']}}</td>
+              <td>{{key["NEEDS_REVIEW"]['HIGH']}}</td>
+              <td>{{key["NEEDS_REVIEW"]['MEDIUM']}}</td>
+              <td>{{key["NEEDS_REVIEW"]['LOW']}}</td>
+              <td><b>{{key["NEEDS_REVIEW"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="patched">Patched Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["PATCHED"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["PATCHED"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["PATCHED"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["PATCHED"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["PATCHED"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["PATCHED"]['CRITICAL']}}</td>
+              <td>{{key["PATCHED"]['HIGH']}}</td>
+              <td>{{key["PATCHED"]['MEDIUM']}}</td>
+              <td>{{key["PATCHED"]['LOW']}}</td>
+              <td><b>{{key["PATCHED"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="remediation_complete">Remediation Complete Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_COMPLETE"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_COMPLETE"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_COMPLETE"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_COMPLETE"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_COMPLETE"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["REMEDIATION_COMPLETE"]['CRITICAL']}}</td>
+              <td>{{key["REMEDIATION_COMPLETE"]['HIGH']}}</td>
+              <td>{{key["REMEDIATION_COMPLETE"]['MEDIUM']}}</td>
+              <td>{{key["REMEDIATION_COMPLETE"]['LOW']}}</td>
+              <td><b>{{key["REMEDIATION_COMPLETE"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+{% endif %}
+<h1><a name="remediation_required">Remediation Required Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_REQUIRED"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_REQUIRED"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_REQUIRED"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_REQUIRED"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["REMEDIATION_REQUIRED"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["REMEDIATION_REQUIRED"]['CRITICAL']}}</td>
+              <td>{{key["REMEDIATION_REQUIRED"]['HIGH']}}</td>
+              <td>{{key["REMEDIATION_REQUIRED"]['MEDIUM']}}</td>
+              <td>{{key["REMEDIATION_REQUIRED"]['LOW']}}</td>
+              <td><b>{{key["REMEDIATION_REQUIRED"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <br>
+  {% endif %}
+<h1><a name="not_affected">Not affected Issues by Project/versions</a></h1>
+{% if totals['projects'].empty %}
+  No projects found!.
+{% else %}
+  <table id="alter">
+    <tr>
+      <th>Project Name</th>
+      <th>Versions</th>
+    </tr>
+{% for key in totals['projects'] %}
+      <tr>
+        <td><b><a href={{bdURL}}/api/projects/{{key['projectID']}}>{{key['projectName']}} (version count: {{key['projectVersionCount']}})</a></b></td>
+        <td>
+          <table>
+            <tr>
+              <th>Version Name</th>
+              <th>Critical</th>
+              <th>High</th>
+              <th>Medium</th>
+              <th>Low</th>
+              <th>Total</th>
+            </tr>
+            {% for key2 in key['projectVersionLevelCounts'] %}
+            <tr>
+              {% if key2['isDormant'] == True %}
+              <td><span style='color:red'>&#9888;&nbsp;</span><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% else %}
+              <td><b><a href={{bdURL}}/ui/projects/{{key['projectID']}}/versions/{{key2['versionID']}}/vulnerability-bom?componentList.offset=0&componentList.sort=project.name+ASC&vulns.offset=0>{{key2['versionName']}}</a></b>
+              {% endif %}
+              <br><i>Phase: {{key2['phase']}}</i>
+              <br><i>Distribution: {{key2['distribution']}}</i>
+              <br><i>Last Scanned: {{key2['lastScanDate']}}</i>
+              </td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NOT_AFFECTED"]['CRITICAL']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NOT_AFFECTED"]['HIGH']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NOT_AFFECTED"]['MEDIUM']}}</td>
+              <td>{{key2['vulnerableComponentCountsByRemediationStatus']["NOT_AFFECTED"]['LOW']}}</td>
+              <td><b>{{key2['vulnerableComponentCountsByRemediationStatus']["NOT_AFFECTED"]['Total']}}</b></td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td><b>Totals</b></td>
+              <td>{{key["NOT_AFFECTED"]['CRITICAL']}}</td>
+              <td>{{key["NOT_AFFECTED"]['HIGH']}}</td>
+              <td>{{key["NOT_AFFECTED"]['MEDIUM']}}</td>
+              <td>{{key["NOT_AFFECTED"]['LOW']}}</td>
+              <td><b>{{key["NOT_AFFECTED"]['Total']}}</b></td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</body>
+</HTML>
